@@ -12,9 +12,11 @@ public class Solution {
 	private static List<Edge>[] verticesAndEdges;
 	private static int[] distanceFromStart;
 
-	private static void addVertex(Integer nodeNumber) {
-		if (verticesAndEdges[nodeNumber - 1] == null) {
-			verticesAndEdges[nodeNumber - 1] = new ArrayList<Edge>();
+	@SuppressWarnings("unchecked")
+	private static void initializeVerticesAndEdges(Integer numberOfVertices) {
+		verticesAndEdges = new ArrayList[numberOfVertices];
+		for (int i = 0; i < numberOfVertices; i++) {
+			verticesAndEdges[i] = new ArrayList<Edge>();
 		}
 	}
 
@@ -25,6 +27,7 @@ public class Solution {
 	}
 
 	private static void breadthFirstSearch(Integer numberOfVertices, Integer startVertex) {
+		distanceFromStart = new int[numberOfVertices];
 		Arrays.fill(distanceFromStart, Integer.MAX_VALUE);
 		distanceFromStart[startVertex - 1] = 0;
 
@@ -37,22 +40,16 @@ public class Solution {
 
 			int current = queue.remove(0);
 
-			if (visited[current - 1] == false) {
-				visited[current - 1] = true;
+			for (Edge edge : verticesAndEdges[current - 1]) {
+				if (visited[edge.getEndVertex() - 1] == false) {
+					visited[edge.getEndVertex() - 1] = true;
 
-				if (verticesAndEdges[current - 1] != null) {
+					int previousDistanceFromStart = distanceFromStart[edge.getEndVertex() - 1];
+					int newDistanceFromStart = distanceFromStart[current - 1] + edge.getEdgeLength();
+					queue.add(edge.getEndVertex());
 
-					for (Edge edge : verticesAndEdges[current - 1]) {
-						if (visited[edge.getEndVertex() - 1] == false) {
-
-							int previousDistanceFromStart = distanceFromStart[edge.getEndVertex() - 1];
-							int newDistanceFromStart = distanceFromStart[current - 1] + edge.getEdgeLength();
-							queue.add(edge.getEndVertex());
-
-							if (previousDistanceFromStart > newDistanceFromStart) {
-								distanceFromStart[edge.getEndVertex() - 1] = newDistanceFromStart;
-							}
-						}
+					if (previousDistanceFromStart > newDistanceFromStart) {
+						distanceFromStart[edge.getEndVertex() - 1] = newDistanceFromStart;
 					}
 				}
 			}
@@ -81,37 +78,34 @@ public class Solution {
 		System.out.println();
 	}
 
-	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		int numberOfTestCases = Integer.parseInt(st.nextToken());
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer stringTokenizer = new StringTokenizer(bufferedReader.readLine());
+		int numberOfTestCases = Integer.parseInt(stringTokenizer.nextToken());
 
 		for (int i = 0; i < numberOfTestCases; i++) {
 
-			st = new StringTokenizer(br.readLine());
-			int numberOfVertices = Integer.parseInt(st.nextToken());
-			int numberOfEdges = Integer.parseInt(st.nextToken());
-			verticesAndEdges = new ArrayList[numberOfVertices];
-			distanceFromStart = new int[numberOfVertices];
+			stringTokenizer = new StringTokenizer(bufferedReader.readLine());
+			int numberOfVertices = Integer.parseInt(stringTokenizer.nextToken());
+			int numberOfEdges = Integer.parseInt(stringTokenizer.nextToken());
+			initializeVerticesAndEdges(numberOfVertices);
 
 			for (int j = 0; j < numberOfEdges; j++) {
-				st = new StringTokenizer(br.readLine());
-				int vertexOne = Integer.parseInt(st.nextToken());
-				int vertexTwo = Integer.parseInt(st.nextToken());
-				// Each edge is 6 units by definition.
+				stringTokenizer = new StringTokenizer(bufferedReader.readLine());
+				int vertexOne = Integer.parseInt(stringTokenizer.nextToken());
+				int vertexTwo = Integer.parseInt(stringTokenizer.nextToken());
+				/** Each edge is 6 units by definition. */
 				int edgeLength = 6;
-				addVertex(vertexOne);
-				addVertex(vertexTwo);
 				addEdgeInBothDirections(vertexOne, vertexTwo, edgeLength);
 			}
 
-			st = new StringTokenizer(br.readLine());
-			int startVertex = Integer.parseInt(st.nextToken());
+			stringTokenizer = new StringTokenizer(bufferedReader.readLine());
+			int startVertex = Integer.parseInt(stringTokenizer.nextToken());
 
 			breadthFirstSearch(numberOfVertices, startVertex);
 			printResults(startVertex);
 		}
+		bufferedReader.close();
 	}
 }
 
